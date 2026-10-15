@@ -1,0 +1,730 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SMART PARK — Digital Parking Platform (Web Application)</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="src/main/resources/static/css/style.css">
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
+  <style>
+    body { background-color: #f8fafc; font-family: 'Segoe UI', system-ui, sans-serif; }
+    .role-badge { cursor: pointer; transition: all 0.2s; }
+    .role-badge.active { background-color: #2563eb !important; color: white !important; }
+  </style>
+</head>
+<body>
+
+  <!-- Top Global Bar with Role Switcher -->
+  <nav class="navbar navbar-dark bg-dark py-2 px-4 sticky-top">
+    <div class="container-fluid d-flex justify-content-between align-items-center">
+      <div class="d-flex align-items-center gap-2">
+        <i class="bi bi-p-square-fill text-primary fs-3"></i>
+        <span class="navbar-brand fw-bold mb-0">SMART PARK</span>
+        <span class="badge bg-primary-subtle text-primary border border-primary-subtle d-none d-sm-inline">Interactive Web Application</span>
+      </div>
+      <div class="d-flex align-items-center gap-2">
+        <span class="text-white-50 small d-none d-md-inline">Role:</span>
+        <div class="btn-group btn-group-sm" role="group">
+          <button id="btnRoleCustomer" class="btn btn-outline-light active" onclick="switchPortal('CUSTOMER')">Customer</button>
+          <button id="btnRoleStaff" class="btn btn-outline-light" onclick="switchPortal('STAFF')">Staff Gate</button>
+          <button id="btnRoleAdmin" class="btn btn-outline-light" onclick="switchPortal('ADMIN')">Admin</button>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <div class="toast-container" id="toastContainer"></div>
+
+  <!-- Main Portal Views -->
+  <div class="container-fluid p-4">
+
+    <!-- 1. CUSTOMER PORTAL -->
+    <div id="portalCustomer" class="portal-view">
+      <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
+        <div>
+          <h2 class="fw-bold mb-1">Customer Parking Dashboard</h2>
+          <p class="text-muted mb-0">Select an area, vehicle type, and reserve available slots with instant QR pass generation.</p>
+        </div>
+        <div class="d-flex gap-2">
+          <button class="btn btn-outline-primary" onclick="switchCustomerTab('reservations')">
+            <i class="bi bi-ticket-perforated me-1"></i> My Passes (<span id="custPassCount">2</span>)
+          </button>
+          <button class="btn btn-primary" onclick="switchCustomerTab('booking')">
+            <i class="bi bi-plus-circle me-1"></i> Book Slot
+          </button>
+        </div>
+      </div>
+
+      <!-- Booking Screen -->
+      <div id="custBookingScreen" class="row g-4">
+        <!-- Controls -->
+        <div class="col-lg-4">
+          <div class="sp-card shadow-sm p-4">
+            <h5 class="fw-bold mb-3"><i class="bi bi-sliders text-primary me-2"></i>Booking Parameters</h5>
+            <div class="mb-3">
+              <label class="form-label fw-semibold small">1. Choose Parking Facility</label>
+              <select class="form-select" id="areaSelect" onchange="renderSlots()"></select>
+            </div>
+            <div class="mb-3">
+              <label class="form-label fw-semibold small">2. Select Registered Vehicle</label>
+              <select class="form-select" id="vehicleSelect" onchange="renderSlots()"></select>
+            </div>
+            <div class="row g-2 mb-3">
+              <div class="col-6">
+                <label class="form-label fw-semibold small">Start Time</label>
+                <select class="form-select" id="startTimeSelect" onchange="renderSlots()">
+                  <option value="9">09:00 AM</option>
+                  <option value="10" selected>10:00 AM</option>
+                  <option value="12">12:00 PM</option>
+                  <option value="14">02:00 PM</option>
+                </select>
+              </div>
+              <div class="col-6">
+                <label class="form-label fw-semibold small">End Time</label>
+                <select class="form-select" id="endTimeSelect" onchange="renderSlots()">
+                  <option value="11">11:00 AM</option>
+                  <option value="12">12:00 PM</option>
+                  <option value="13" selected>01:00 PM (3h)</option>
+                  <option value="15">03:00 PM (5h)</option>
+                </select>
+              </div>
+            </div>
+
+            <!-- Price Breakdown -->
+            <div class="p-3 bg-light rounded-3 border mb-3">
+              <div class="d-flex justify-content-between small text-muted mb-1">
+                <span>Selected Slot:</span>
+                <strong id="displaySelectedSlot" class="text-dark">None (Click a green slot)</strong>
+              </div>
+              <div class="d-flex justify-content-between align-items-center">
+                <span class="fw-bold">Estimated Cost:</span>
+                <span class="fs-4 fw-bold text-success" id="displayEstPrice">$0.00</span>
+              </div>
+              <div class="small text-muted mt-1" style="font-size: 0.75rem;">
+                * Minimum 1 hour charge applied with ceiling rounding.
+              </div>
+            </div>
+
+            <button id="btnBookSlot" class="btn btn-primary w-100 py-2.5 fw-bold" disabled onclick="executeBooking()">
+              <i class="bi bi-qr-code me-1"></i> Confirm & Generate QR Pass
+            </button>
+          </div>
+        </div>
+
+        <!-- Interactive Map -->
+        <div class="col-lg-8">
+          <div class="sp-card shadow-sm p-4">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+              <h5 class="fw-bold mb-0"><i class="bi bi-grid-3x3-gap-fill text-primary me-2"></i>Real-Time Slot Map</h5>
+              <div class="slot-legend py-1 px-3">
+                <div class="legend-item"><div class="legend-color color-available"></div> Available</div>
+                <div class="legend-item"><div class="legend-color color-occupied"></div> Occupied</div>
+                <div class="legend-item"><div class="legend-color color-reserved"></div> Reserved</div>
+                <div class="legend-item"><div class="legend-color color-inactive"></div> Inactive</div>
+              </div>
+            </div>
+            <div class="slot-grid" id="slotsGrid"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Reservations Table Screen -->
+      <div id="custReservationsScreen" class="sp-card shadow-sm p-4 d-none">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+          <h5 class="fw-bold mb-0"><i class="bi bi-ticket-perforated-fill text-primary me-2"></i>My Bookings & Digital Passes</h5>
+          <button class="btn btn-sm btn-outline-secondary" onclick="switchCustomerTab('booking')">Back to Booking</button>
+        </div>
+        <div class="table-responsive">
+          <table class="table table-hover align-middle mb-0">
+            <thead class="table-light">
+              <tr>
+                <th>Booking Ref</th>
+                <th>Location & Slot</th>
+                <th>Vehicle</th>
+                <th>Window</th>
+                <th>Status</th>
+                <th>Payment</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="custResTableBody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- 2. STAFF GATE SCANNER PORTAL -->
+    <div id="portalStaff" class="portal-view d-none">
+      <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
+        <div>
+          <h2 class="fw-bold mb-1">Staff Gate Control & QR Verification</h2>
+          <p class="text-muted mb-0">Scan customer QR codes, approve entry, and calculate checkout duration billing.</p>
+        </div>
+      </div>
+
+      <!-- Metrics -->
+      <div class="row g-3 mb-4">
+        <div class="col-sm-6 col-xl-3">
+          <div class="sp-card stat-card p-3">
+            <div>
+              <div class="text-muted small fw-semibold">TODAY'S BOOKINGS</div>
+              <div class="fs-2 fw-bold text-dark mt-1" id="staffMetricTotal">2</div>
+            </div>
+            <div class="stat-icon stat-blue"><i class="bi bi-journal-check"></i></div>
+          </div>
+        </div>
+        <div class="col-sm-6 col-xl-3">
+          <div class="sp-card stat-card p-3">
+            <div>
+              <div class="text-muted small fw-semibold">EXPECTED ARRIVALS</div>
+              <div class="fs-2 fw-bold text-primary mt-1" id="staffMetricArrivals">1</div>
+            </div>
+            <div class="stat-icon stat-orange"><i class="bi bi-box-arrow-in-right"></i></div>
+          </div>
+        </div>
+        <div class="col-sm-6 col-xl-3">
+          <div class="sp-card stat-card p-3">
+            <div>
+              <div class="text-muted small fw-semibold">CURRENTLY PARKED</div>
+              <div class="fs-2 fw-bold text-success mt-1" id="staffMetricParked">1</div>
+            </div>
+            <div class="stat-icon stat-green"><i class="bi bi-car-front-fill"></i></div>
+          </div>
+        </div>
+        <div class="col-sm-6 col-xl-3">
+          <div class="sp-card stat-card p-3">
+            <div>
+              <div class="text-muted small fw-semibold">COMPLETED TODAY</div>
+              <div class="fs-2 fw-bold text-secondary mt-1" id="staffMetricCompleted">0</div>
+            </div>
+            <div class="stat-icon stat-purple"><i class="bi bi-check-all"></i></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Scanner Box -->
+      <div class="sp-card shadow-sm p-4 mb-4">
+        <h5 class="fw-bold mb-3"><i class="bi bi-qr-code-scan text-primary me-2"></i>Verify Pass Token or Booking Reference</h5>
+        <div class="input-group mb-3">
+          <span class="input-group-text bg-white"><i class="bi bi-search text-muted"></i></span>
+          <input type="text" id="staffInput" class="form-control form-control-lg font-monospace" placeholder="Enter reference (e.g. SP-2026-001) or scan QR token...">
+          <button class="btn btn-primary px-4 fw-bold" onclick="staffVerifyPass()">Verify Pass</button>
+        </div>
+        <div id="staffResultCard" class="p-4 border rounded-3 bg-light d-none"></div>
+      </div>
+
+      <!-- Active Sessions -->
+      <div class="sp-card shadow-sm p-4">
+        <h5 class="fw-bold mb-3"><i class="bi bi-car-front-fill text-success me-2"></i>Currently Parked Vehicles</h5>
+        <div class="table-responsive">
+          <table class="table table-hover align-middle mb-0">
+            <thead class="table-light">
+              <tr>
+                <th>Booking Ref</th>
+                <th>Plate & Type</th>
+                <th>Bay</th>
+                <th>Driver</th>
+                <th>Entry Time</th>
+                <th>Status</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody id="staffActiveTableBody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- 3. ADMIN PORTAL -->
+    <div id="portalAdmin" class="portal-view d-none">
+      <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
+        <div>
+          <h2 class="fw-bold mb-1">Administrative Operations & Analytics</h2>
+          <p class="text-muted mb-0">Real-time facility occupancy, revenue analytics, and system audit log.</p>
+        </div>
+      </div>
+
+      <!-- Admin 8 KPIs -->
+      <div class="row g-3 mb-4">
+        <div class="col-sm-6 col-xl-3"><div class="sp-card stat-card p-3"><div><div class="text-muted small">FACILITIES</div><div class="fs-3 fw-bold" id="adStatFac">3</div></div><div class="stat-icon stat-blue"><i class="bi bi-geo-alt"></i></div></div></div>
+        <div class="col-sm-6 col-xl-3"><div class="sp-card stat-card p-3"><div><div class="text-muted small">TOTAL SLOTS</div><div class="fs-3 fw-bold" id="adStatSlots">18</div></div><div class="stat-icon stat-purple"><i class="bi bi-grid-3x3"></i></div></div></div>
+        <div class="col-sm-6 col-xl-3"><div class="sp-card stat-card p-3"><div><div class="text-muted small">AVAILABLE</div><div class="fs-3 fw-bold text-success" id="adStatAvail">12</div></div><div class="stat-icon stat-green"><i class="bi bi-check-circle"></i></div></div></div>
+        <div class="col-sm-6 col-xl-3"><div class="sp-card stat-card p-3"><div><div class="text-muted small">OCCUPIED</div><div class="fs-3 fw-bold text-danger" id="adStatOcc">4</div></div><div class="stat-icon stat-red"><i class="bi bi-dash-circle"></i></div></div></div>
+        <div class="col-sm-6 col-xl-3"><div class="sp-card stat-card p-3"><div><div class="text-muted small">RESERVED</div><div class="fs-3 fw-bold text-warning" id="adStatRes">1</div></div><div class="stat-icon stat-orange"><i class="bi bi-clock"></i></div></div></div>
+        <div class="col-sm-6 col-xl-3"><div class="sp-card stat-card p-3"><div><div class="text-muted small">ACTIVE SESSIONS</div><div class="fs-3 fw-bold text-primary" id="adStatAct">2</div></div><div class="stat-icon stat-blue"><i class="bi bi-car-front"></i></div></div></div>
+        <div class="col-sm-6 col-xl-3"><div class="sp-card stat-card p-3"><div><div class="text-muted small">COMPLETED</div><div class="fs-3 fw-bold text-secondary" id="adStatComp">14</div></div><div class="stat-icon stat-purple"><i class="bi bi-journal-check"></i></div></div></div>
+        <div class="col-sm-6 col-xl-3"><div class="sp-card stat-card p-3"><div><div class="text-muted small">TOTAL REVENUE</div><div class="fs-3 fw-bold text-success" id="adStatRev">$285.50</div></div><div class="stat-icon stat-green"><i class="bi bi-cash-coin"></i></div></div></div>
+      </div>
+
+      <!-- Charts -->
+      <div class="row g-4 mb-4">
+        <div class="col-lg-6">
+          <div class="sp-card shadow-sm p-4">
+            <h5 class="fw-bold mb-3"><i class="bi bi-bar-chart-fill text-primary me-2"></i>Occupancy by Facility</h5>
+            <div style="height: 260px; position: relative;">
+              <canvas id="appOccupancyChart"></canvas>
+            </div>
+          </div>
+        </div>
+        <div class="col-lg-6">
+          <div class="sp-card shadow-sm p-4">
+            <h5 class="fw-bold mb-3"><i class="bi bi-graph-up text-success me-2"></i>Revenue Trend</h5>
+            <div style="height: 260px; position: relative;">
+              <canvas id="appRevenueChart"></canvas>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- QR Modal -->
+  <div class="modal fade" id="qrPassModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title"><i class="bi bi-qr-code text-primary me-2"></i>Digital Parking Pass</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body text-center py-4">
+          <h4 id="mRef" class="fw-bold text-primary font-monospace mb-1"></h4>
+          <p id="mLoc" class="text-muted small mb-3"></p>
+          <div class="p-3 bg-white border rounded-3 d-inline-block shadow-sm mb-3">
+            <svg id="mSvg" style="width: 170px; height: 170px;" viewBox="0 0 100 100"></svg>
+          </div>
+          <div class="small font-monospace text-muted mb-2" id="mToken"></div>
+          <div class="p-3 bg-light rounded-3 text-start small border">
+            <div class="d-flex justify-content-between"><span>Vehicle:</span><strong id="mVeh"></strong></div>
+            <div class="d-flex justify-content-between"><span>Window:</span><strong id="mTime"></strong></div>
+            <div class="d-flex justify-content-between pt-1 border-top mt-1"><span>Fee:</span><strong id="mFee" class="text-success"></strong></div>
+          </div>
+        </div>
+        <div class="modal-footer justify-content-between">
+          <button class="btn btn-outline-secondary" onclick="window.print()"><i class="bi bi-printer me-1"></i> Print Pass</button>
+          <button class="btn btn-primary" data-bs-dismiss="modal">Done</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Application Logic -->
+  <script src="src/main/resources/static/js/main.js"></script>
+  <script>
+    // In-memory data store
+    const APP_DB = {
+      activeRole: 'CUSTOMER',
+      selectedSlotId: null,
+      areas: [
+        { id: 1, name: "Metro Central Plaza", address: "100 Financial Way" },
+        { id: 2, name: "Grand North Terminal", address: "45 Airport Blvd" },
+        { id: 3, name: "Harbor View Deck", address: "78 Waterfront Prom" }
+      ],
+      vehicles: [
+        { id: 1, plate: "CA-789-XYZ", type: "CAR" },
+        { id: 2, plate: "EV-345-TES", type: "EV" },
+        { id: 3, plate: "MC-999-FAST", type: "MOTORCYCLE" }
+      ],
+      slots: [
+        { id: 1, areaId: 1, number: "A-101", type: "CAR", rate: 5.0, status: "AVAILABLE" },
+        { id: 2, areaId: 1, number: "A-102", type: "CAR", rate: 5.0, status: "AVAILABLE" },
+        { id: 3, areaId: 1, number: "A-103", type: "CAR", rate: 5.0, status: "RESERVED" },
+        { id: 4, areaId: 1, number: "A-104", type: "EV", rate: 7.5, status: "AVAILABLE" },
+        { id: 5, areaId: 1, number: "A-105", type: "EV", rate: 7.5, status: "OCCUPIED" },
+        { id: 6, areaId: 1, number: "B-201", type: "MOTORCYCLE", rate: 2.5, status: "AVAILABLE" },
+        { id: 7, areaId: 1, number: "B-202", type: "MOTORCYCLE", rate: 2.5, status: "AVAILABLE" },
+        { id: 8, areaId: 1, number: "C-301", type: "TRUCK", rate: 12.0, status: "AVAILABLE" },
+        { id: 9, areaId: 1, number: "C-302", type: "TRUCK", rate: 12.0, status: "INACTIVE" },
+
+        { id: 10, areaId: 2, number: "N-01", type: "CAR", rate: 4.0, status: "AVAILABLE" },
+        { id: 11, areaId: 2, number: "N-02", type: "CAR", rate: 4.0, status: "AVAILABLE" },
+        { id: 12, areaId: 2, number: "N-03", type: "EV", rate: 6.0, status: "AVAILABLE" },
+        { id: 13, areaId: 2, number: "N-04", type: "MOTORCYCLE", rate: 2.0, status: "AVAILABLE" },
+
+        { id: 14, areaId: 3, number: "H-01", type: "CAR", rate: 4.5, status: "AVAILABLE" },
+        { id: 15, areaId: 3, number: "H-02", type: "CAR", rate: 4.5, status: "AVAILABLE" },
+        { id: 16, areaId: 3, number: "H-03", type: "EV", rate: 6.5, status: "AVAILABLE" }
+      ],
+      reservations: [
+        {
+          id: 1, reference: "SP-2026-001", plate: "CA-789-XYZ", type: "CAR",
+          slotId: 3, slotNum: "A-103", areaId: 1, areaName: "Metro Central Plaza",
+          startH: 10, endH: 13, status: "CONFIRMED", fee: 15.00, paid: true,
+          token: "uuid-9f82-a012-4c28", driver: "Alex Johnson"
+        },
+        {
+          id: 2, reference: "SP-2026-002", plate: "EV-345-TES", type: "EV",
+          slotId: 5, slotNum: "A-105", areaId: 1, areaName: "Metro Central Plaza",
+          startH: 8, endH: 12, status: "ACTIVE", fee: 22.50, paid: false,
+          token: "uuid-7a11-b992-1e55", driver: "Alex Johnson", entryTime: "08:15 AM"
+        }
+      ]
+    };
+
+    document.addEventListener('DOMContentLoaded', () => {
+      initCustomerControls();
+      renderSlots();
+      renderReservationsTable();
+      updateStaffPortal();
+      initCharts();
+    });
+
+    function switchPortal(role) {
+      APP_DB.activeRole = role;
+      document.querySelectorAll('.portal-view').forEach(el => el.classList.add('d-none'));
+      document.querySelectorAll('.btn-group button').forEach(b => b.classList.remove('active'));
+
+      if (role === 'CUSTOMER') {
+        document.getElementById('portalCustomer').classList.remove('d-none');
+        document.getElementById('btnRoleCustomer').classList.add('active');
+      } else if (role === 'STAFF') {
+        document.getElementById('portalStaff').classList.remove('d-none');
+        document.getElementById('btnRoleStaff').classList.add('active');
+        updateStaffPortal();
+      } else if (role === 'ADMIN') {
+        document.getElementById('portalAdmin').classList.remove('d-none');
+        document.getElementById('btnRoleAdmin').classList.add('active');
+        updateAdminKPIs();
+      }
+      showToast(`Switched to ${role} Portal`, 'info');
+    }
+
+    function switchCustomerTab(tab) {
+      if (tab === 'booking') {
+        document.getElementById('custBookingScreen').classList.remove('d-none');
+        document.getElementById('custReservationsScreen').classList.add('d-none');
+      } else {
+        document.getElementById('custBookingScreen').classList.add('d-none');
+        document.getElementById('custReservationsScreen').classList.remove('d-none');
+        renderReservationsTable();
+      }
+    }
+
+    function initCustomerControls() {
+      const aSel = document.getElementById('areaSelect');
+      aSel.innerHTML = APP_DB.areas.map(a => `<option value="${a.id}">${a.name} — ${a.address}</option>`).join('');
+
+      const vSel = document.getElementById('vehicleSelect');
+      vSel.innerHTML = APP_DB.vehicles.map(v => `<option value="${v.id}" data-type="${v.type}">${v.plate} (${v.type})</option>`).join('');
+    }
+
+    function renderSlots() {
+      const areaId = parseInt(document.getElementById('areaSelect').value) || 1;
+      const vSel = document.getElementById('vehicleSelect');
+      const vehType = vSel.options[vSel.selectedIndex]?.getAttribute('data-type') || 'CAR';
+      const startH = parseInt(document.getElementById('startTimeSelect').value);
+      const endH = parseInt(document.getElementById('endTimeSelect').value);
+
+      APP_DB.selectedSlotId = null;
+      document.getElementById('displaySelectedSlot').textContent = 'None Selected';
+      document.getElementById('displayEstPrice').textContent = '$0.00';
+      document.getElementById('btnBookSlot').disabled = true;
+
+      const grid = document.getElementById('slotsGrid');
+      const slots = APP_DB.slots.filter(s => s.areaId === areaId);
+
+      grid.innerHTML = slots.map(s => {
+        const hasOverlap = APP_DB.reservations.some(r => r.slotId === s.id && r.status !== 'CANCELLED' && (startH < r.endH && endH > r.startH));
+
+        let sClass = 'slot-available';
+        let sBadge = 'AVAILABLE';
+        let click = true;
+
+        if (s.status === 'INACTIVE') { sClass = 'slot-inactive'; sBadge = 'INACTIVE'; click = false; }
+        else if (s.status === 'OCCUPIED') { sClass = 'slot-occupied'; sBadge = 'OCCUPIED'; click = false; }
+        else if (hasOverlap || s.status === 'RESERVED') { sClass = 'slot-reserved'; sBadge = 'RESERVED'; click = false; }
+
+        if (s.type !== vehType) click = false;
+
+        return `
+          <div class="slot-item ${sClass}" ${click ? `onclick="selectBay(${s.id}, '${s.number}', ${s.rate}, this)"` : ''}>
+            <div class="slot-number">${s.number}</div>
+            <div class="slot-type">${s.type}</div>
+            <div class="slot-price">$${s.rate.toFixed(2)}/hr</div>
+            <span class="slot-badge">${sBadge}</span>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function selectBay(id, num, rate, el) {
+      document.querySelectorAll('.slot-item').forEach(i => i.classList.remove('selected'));
+      el.classList.add('selected');
+      APP_DB.selectedSlotId = id;
+
+      const sH = parseInt(document.getElementById('startTimeSelect').value);
+      const eH = parseInt(document.getElementById('endTimeSelect').value);
+      const hrs = Math.max(1, eH - sH);
+      const fee = (hrs * rate).toFixed(2);
+
+      document.getElementById('displaySelectedSlot').textContent = `${num} ($${rate}/hr)`;
+      document.getElementById('displayEstPrice').textContent = `$${fee} (${hrs}h)`;
+      document.getElementById('btnBookSlot').disabled = false;
+    }
+
+    function executeBooking() {
+      if (!APP_DB.selectedSlotId) return;
+      const slot = APP_DB.slots.find(s => s.id === APP_DB.selectedSlotId);
+      const area = APP_DB.areas.find(a => a.id === slot.areaId);
+      const vSel = document.getElementById('vehicleSelect');
+      const vehicle = APP_DB.vehicles.find(v => v.id === parseInt(vSel.value));
+
+      const sH = parseInt(document.getElementById('startTimeSelect').value);
+      const eH = parseInt(document.getElementById('endTimeSelect').value);
+      const fee = (Math.max(1, eH - sH) * slot.rate);
+      const ref = `SP-2026-${Math.floor(100 + Math.random() * 900)}`;
+
+      const newRes = {
+        id: APP_DB.reservations.length + 1,
+        reference: ref,
+        plate: vehicle.plate,
+        type: vehicle.type,
+        slotId: slot.id,
+        slotNum: slot.number,
+        areaId: area.id,
+        areaName: area.name,
+        startH: sH,
+        endH: eH,
+        status: "CONFIRMED",
+        fee: fee,
+        paid: false,
+        token: `uuid-${Math.random().toString(36).substring(2, 8)}`,
+        driver: "Alex Johnson"
+      };
+
+      APP_DB.reservations.push(newRes);
+      slot.status = "RESERVED";
+      showToast(`Reservation ${ref} created! Slot reserved.`, 'success');
+
+      renderSlots();
+      renderReservationsTable();
+      updateStaffPortal();
+      openModal(newRes);
+    }
+
+    function renderReservationsTable() {
+      const tbody = document.getElementById('custResTableBody');
+      document.getElementById('custPassCount').textContent = APP_DB.reservations.length;
+
+      tbody.innerHTML = APP_DB.reservations.slice().reverse().map(r => `
+        <tr>
+          <td><strong class="font-monospace text-primary">${r.reference}</strong></td>
+          <td>${r.areaName} (${r.slotNum})</td>
+          <td>${r.plate} (${r.type})</td>
+          <td>${r.startH}:00 - ${r.endH}:00</td>
+          <td><span class="badge ${getStatusBadgeClass(r.status)}">${r.status}</span></td>
+          <td><span class="fw-bold text-success">$${r.fee.toFixed(2)}</span> <span class="badge ${r.paid ? 'bg-success' : 'bg-warning text-dark'}">${r.paid ? 'PAID' : 'PENDING'}</span></td>
+          <td>
+            <button class="btn btn-sm btn-outline-primary" onclick="openModalById(${r.id})"><i class="bi bi-qr-code"></i></button>
+            ${r.status === 'CONFIRMED' ? `<button class="btn btn-sm btn-outline-danger" onclick="cancelRes(${r.id})"><i class="bi bi-x-circle"></i></button>` : ''}
+            ${!r.paid ? `<button class="btn btn-sm btn-success" onclick="payRes(${r.id})">Pay</button>` : ''}
+          </td>
+        </tr>
+      `).join('');
+    }
+
+    function cancelRes(id) {
+      const r = APP_DB.reservations.find(x => x.id === id);
+      if (!r) return;
+      r.status = 'CANCELLED';
+      const slot = APP_DB.slots.find(s => s.id === r.slotId);
+      if (slot) slot.status = 'AVAILABLE';
+      showToast(`Reservation ${r.reference} cancelled`, 'warning');
+      renderSlots();
+      renderReservationsTable();
+    }
+
+    function payRes(id) {
+      const r = APP_DB.reservations.find(x => x.id === id);
+      if (!r) return;
+      r.paid = true;
+      showToast(`Payment of $${r.fee.toFixed(2)} completed`, 'success');
+      renderReservationsTable();
+      updateAdminKPIs();
+    }
+
+    function openModalById(id) {
+      const r = APP_DB.reservations.find(x => x.id === id);
+      if (r) openModal(r);
+    }
+
+    function openModal(r) {
+      document.getElementById('mRef').textContent = r.reference;
+      document.getElementById('mLoc').textContent = `${r.areaName} — Bay ${r.slotNum}`;
+      document.getElementById('mToken').textContent = `Pass Token: ${r.token}`;
+      document.getElementById('mVeh').textContent = `${r.plate} (${r.type})`;
+      document.getElementById('mTime').textContent = `${r.startH}:00 to ${r.endH}:00`;
+      document.getElementById('mFee').textContent = `$${r.fee.toFixed(2)}`;
+
+      drawQr('mSvg', r.reference);
+      new bootstrap.Modal(document.getElementById('qrPassModal')).show();
+    }
+
+    function drawQr(svgId, text) {
+      const svg = document.getElementById(svgId);
+      let hash = 0;
+      for (let i = 0; i < text.length; i++) hash = (hash << 5) - hash + text.charCodeAt(i);
+
+      let rects = `
+        <rect x="0" y="0" width="100" height="100" fill="#fff"/>
+        <rect x="8" y="8" width="24" height="24" fill="#000"/><rect x="12" y="12" width="16" height="16" fill="#fff"/><rect x="16" y="16" width="8" height="8" fill="#000"/>
+        <rect x="68" y="8" width="24" height="24" fill="#000"/><rect x="72" y="12" width="16" height="16" fill="#fff"/><rect x="76" y="16" width="8" height="8" fill="#000"/>
+        <rect x="8" y="68" width="24" height="24" fill="#000"/><rect x="12" y="72" width="16" height="16" fill="#fff"/><rect x="16" y="76" width="8" height="8" fill="#000"/>
+      `;
+      for (let r = 2; r < 23; r++) {
+        for (let c = 2; c < 23; c++) {
+          if ((r < 9 && c < 9) || (r < 9 && c > 15) || (r > 15 && c < 9)) continue;
+          if (Math.sin(hash * r * 11 + c * 13) > 0) rects += `<rect x="${c * 4}" y="${r * 4}" width="4" height="4" fill="#000"/>`;
+        }
+      }
+      svg.innerHTML = rects;
+    }
+
+    // Staff Portal operations
+    function updateStaffPortal() {
+      const arrivals = APP_DB.reservations.filter(r => r.status === 'CONFIRMED').length;
+      const parked = APP_DB.reservations.filter(r => r.status === 'ACTIVE').length;
+      const completed = APP_DB.reservations.filter(r => r.status === 'COMPLETED').length;
+
+      document.getElementById('staffMetricTotal').textContent = APP_DB.reservations.length;
+      document.getElementById('staffMetricArrivals').textContent = arrivals;
+      document.getElementById('staffMetricParked').textContent = parked;
+      document.getElementById('staffMetricCompleted').textContent = completed;
+
+      const tbody = document.getElementById('staffActiveTableBody');
+      const active = APP_DB.reservations.filter(r => r.status === 'ACTIVE');
+      if (active.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="7" class="text-center py-4 text-muted">No vehicles currently parked inside.</td></tr>`;
+      } else {
+        tbody.innerHTML = active.map(r => `
+          <tr>
+            <td><strong class="font-monospace text-primary">${r.reference}</strong></td>
+            <td>${r.plate} (${r.type})</td>
+            <td><strong>${r.slotNum}</strong></td>
+            <td>${r.driver}</td>
+            <td>${r.entryTime || 'Just now'}</td>
+            <td><span class="badge bg-success">PARKED</span></td>
+            <td><button class="btn btn-sm btn-primary" onclick="staffCheckout(${r.id})">Check-Out & Bill</button></td>
+          </tr>
+        `).join('');
+      }
+    }
+
+    function staffVerifyPass() {
+      const q = document.getElementById('staffInput').value.trim();
+      const r = APP_DB.reservations.find(x => x.reference.toLowerCase() === q.toLowerCase() || x.token.toLowerCase() === q.toLowerCase());
+      const card = document.getElementById('staffResultCard');
+      card.classList.remove('d-none');
+
+      if (!r) {
+        card.innerHTML = `<div class="text-danger fw-bold text-center">❌ Pass Not Found for query "${q}"</div>`;
+        return;
+      }
+
+      card.innerHTML = `
+        <div class="d-flex justify-content-between align-items-center border-bottom pb-2 mb-3">
+          <div><div class="small text-muted">Pass Reference</div><h4 class="font-monospace fw-bold text-primary mb-0">${r.reference}</h4></div>
+          <span class="badge ${getStatusBadgeClass(r.status)} fs-6">${r.status}</span>
+        </div>
+        <div class="row g-2 small mb-3">
+          <div class="col-6"><strong>Vehicle:</strong> ${r.plate} (${r.type})</div>
+          <div class="col-6"><strong>Assigned Bay:</strong> ${r.areaName} • ${r.slotNum}</div>
+          <div class="col-6"><strong>Customer:</strong> ${r.driver}</div>
+          <div class="col-6"><strong>Window:</strong> ${r.startH}:00 - ${r.endH}:00</div>
+        </div>
+        <div>
+          ${r.status === 'CONFIRMED' ? `<button class="btn btn-success w-100 fw-bold py-2" onclick="staffCheckIn(${r.id})">Record Vehicle Gate Entry (Check-In)</button>` : ''}
+          ${r.status === 'ACTIVE' ? `<button class="btn btn-primary w-100 fw-bold py-2" onclick="staffCheckout(${r.id})">Record Vehicle Exit (Check-Out & Bill)</button>` : ''}
+          ${r.status === 'COMPLETED' ? `<div class="alert alert-info text-center py-2 mb-0">Booking session already completed.</div>` : ''}
+        </div>
+      `;
+    }
+
+    function staffCheckIn(id) {
+      const r = APP_DB.reservations.find(x => x.id === id);
+      if (!r) return;
+      r.status = 'ACTIVE';
+      r.entryTime = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+      const slot = APP_DB.slots.find(s => s.id === r.slotId);
+      if (slot) slot.status = 'OCCUPIED';
+
+      showToast(`Vehicle ${r.plate} checked in at ${r.entryTime}. Slot ${r.slotNum} set OCCUPIED.`, 'success');
+      staffVerifyPass();
+      updateStaffPortal();
+      renderSlots();
+    }
+
+    function staffCheckout(id) {
+      const r = APP_DB.reservations.find(x => x.id === id);
+      if (!r) return;
+      r.status = 'COMPLETED';
+      r.paid = true;
+      const slot = APP_DB.slots.find(s => s.id === r.slotId);
+      if (slot) slot.status = 'AVAILABLE';
+
+      showToast(`Vehicle ${r.plate} checked out! Slot ${r.slotNum} is now AVAILABLE.`, 'success');
+      staffVerifyPass();
+      updateStaffPortal();
+      renderSlots();
+      updateAdminKPIs();
+    }
+
+    function updateAdminKPIs() {
+      const avail = APP_DB.slots.filter(s => s.status === 'AVAILABLE').length;
+      const occ = APP_DB.slots.filter(s => s.status === 'OCCUPIED').length;
+      const resCount = APP_DB.slots.filter(s => s.status === 'RESERVED').length;
+      const act = APP_DB.reservations.filter(r => r.status === 'ACTIVE').length;
+      const comp = APP_DB.reservations.filter(r => r.status === 'COMPLETED').length;
+      const rev = APP_DB.reservations.filter(r => r.paid).reduce((sum, r) => sum + r.fee, 0);
+
+      document.getElementById('adStatFac').textContent = APP_DB.areas.length;
+      document.getElementById('adStatSlots').textContent = APP_DB.slots.length;
+      document.getElementById('adStatAvail').textContent = avail;
+      document.getElementById('adStatOcc').textContent = occ;
+      document.getElementById('adStatRes').textContent = resCount;
+      document.getElementById('adStatAct').textContent = act;
+      document.getElementById('adStatComp').textContent = comp;
+      document.getElementById('adStatRev').textContent = `$${rev.toFixed(2)}`;
+    }
+
+    function initCharts() {
+      const ctxO = document.getElementById('appOccupancyChart');
+      if (ctxO) {
+        new Chart(ctxO, {
+          type: 'bar',
+          data: {
+            labels: ['Metro Central Plaza', 'Grand North Terminal', 'Harbor View Deck'],
+            datasets: [
+              { label: 'Available', data: [5, 4, 3], backgroundColor: '#10b981' },
+              { label: 'Occupied/Reserved', data: [3, 1, 0], backgroundColor: '#ef4444' }
+            ]
+          },
+          options: { responsive: true, maintainAspectRatio: false, scales: { x: { stacked: true }, y: { stacked: true } } }
+        });
+      }
+
+      const ctxR = document.getElementById('appRevenueChart');
+      if (ctxR) {
+        new Chart(ctxR, {
+          type: 'line',
+          data: {
+            labels: ['Day 1', 'Day 2', 'Day 3', 'Day 4', 'Day 5', 'Day 6', 'Today'],
+            datasets: [{ label: 'Revenue ($)', data: [45, 60, 50, 80, 95, 110, 140], borderColor: '#2563eb', tension: 0.3 }]
+          },
+          options: { responsive: true, maintainAspectRatio: false }
+        });
+      }
+    }
+
+    function getStatusBadgeClass(s) {
+      if (s === 'CONFIRMED') return 'bg-primary';
+      if (s === 'ACTIVE') return 'bg-success';
+      if (s === 'COMPLETED') return 'bg-purple bg-secondary';
+      if (s === 'CANCELLED') return 'bg-danger';
+      return 'bg-warning text-dark';
+    }
+  </script>
+</body>
+</html>
