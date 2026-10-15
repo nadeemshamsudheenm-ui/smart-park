@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/head :: head('Customer Dashboard')}"></head>
+<body>
+    <div class="app-container">
+        <!-- Sidebar -->
+        <nav th:replace="~{fragments/sidebar :: sidebar('dashboard')}"></nav>
+
+        <div class="main-wrapper">
+            <!-- Navbar -->
+            <header th:replace="~{fragments/navbar :: navbar}"></header>
+
+            <main class="content-body">
+                <!-- Welcome Banner -->
+                <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
+                    <div>
+                        <h2 class="fw-bold mb-1">Welcome back, <span th:text="${user != null ? user.fullName : 'Customer'}">Alex</span>!</h2>
+                        <p class="text-muted mb-0">Manage your parking slots, active sessions, and digital booking passes.</p>
+                    </div>
+                    <div>
+                        <a th:href="@{/customer/book-slot}" class="btn btn-primary d-flex align-items-center gap-2 shadow-sm">
+                            <i class="bi bi-calendar2-plus-fill"></i> <span>Book a Parking Slot</span>
+                        </a>
+                    </div>
+                </div>
+
+                <!-- KPI Metric Cards -->
+                <div class="row g-3 mb-4">
+                    <div class="col-sm-6 col-xl-3">
+                        <div class="sp-card stat-card">
+                            <div>
+                                <div class="text-muted small fw-semibold">TOTAL BOOKINGS</div>
+                                <div class="fs-2 fw-bold text-dark mt-1" id="metricTotalBookings">—</div>
+                            </div>
+                            <div class="stat-icon stat-blue">
+                                <i class="bi bi-journal-check"></i>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-sm-6 col-xl-3">
+                        <div class="sp-card stat-card">
+                            <div>
+                                <div class="text-muted small fw-semibold">UPCOMING</div>
+                                <div class="fs-2 fw-bold text-primary mt-1" id="metricUpcoming">—</div>
+                            </div>
+                            <div class="stat-icon stat-orange">
+                                <i class="bi bi-calendar-event"></i>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-sm-6 col-xl-3">
+                        <div class="sp-card stat-card">
+                            <div>
+                                <div class="text-muted small fw-semibold">ACTIVE SESSIONS</div>
+                                <div class="fs-2 fw-bold text-success mt-1" id="metricActiveSessions">—</div>
+                            </div>
+                            <div class="stat-icon stat-green">
+                                <i class="bi bi-p-circle-fill"></i>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-sm-6 col-xl-3">
+                        <div class="sp-card stat-card">
+                            <div>
+                                <div class="text-muted small fw-semibold">COMPLETED</div>
+                                <div class="fs-2 fw-bold text-secondary mt-1" id="metricCompleted">—</div>
+                            </div>
+                            <div class="stat-icon stat-purple">
+                                <i class="bi bi-check2-all"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Upcoming Reservations Section -->
+                <div class="sp-card mb-4">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h5 class="fw-bold mb-0"><i class="bi bi-clock-history text-primary me-2"></i>Upcoming & Active Reservations</h5>
+                        <a th:href="@{/customer/reservations}" class="text-primary text-decoration-none small fw-semibold">View All <i class="bi bi-arrow-right"></i></a>
+                    </div>
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Booking Ref</th>
+                                    <th>Location & Slot</th>
+                                    <th>Vehicle</th>
+                                    <th>Scheduled Start</th>
+                                    <th>Status</th>
+                                    <th>Pass / Action</th>
+                                </tr>
+                            </thead>
+                            <tbody id="upcomingReservationsBody">
+                                <tr>
+                                    <td colspan="6" class="text-center py-4 text-muted">
+                                        <div class="spinner-border spinner-border-sm text-primary" role="status"></div> Loading reservations...
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Recent Activity Section -->
+                <div class="sp-card">
+                    <h5 class="fw-bold mb-3"><i class="bi bi-receipt-cutoff text-secondary me-2"></i>Recent Parking Activity</h5>
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Booking Ref</th>
+                                    <th>Location</th>
+                                    <th>Start Time</th>
+                                    <th>Status</th>
+                                    <th>Fee</th>
+                                </tr>
+                            </thead>
+                            <tbody id="recentHistoryBody">
+                                <tr>
+                                    <td colspan="5" class="text-center py-4 text-muted">Loading history...</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <div th:replace="~{fragments/scripts :: scripts}"></div>
+    <script th:src="@{/js/customer.js}"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            initCustomerDashboard();
+        });
+    </script>
+</body>
+</html>

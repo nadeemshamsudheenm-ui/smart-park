@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/head :: head('Gate Verification')}"></head>
+<body>
+    <div class="app-container">
+        <!-- Sidebar -->
+        <nav th:replace="~{fragments/sidebar :: sidebar('staff-verify')}"></nav>
+
+        <div class="main-wrapper">
+            <!-- Navbar -->
+            <header th:replace="~{fragments/navbar :: navbar}"></header>
+
+            <main class="content-body">
+                <div class="mb-4">
+                    <h2 class="fw-bold mb-1">Gate Verification & Session Controller</h2>
+                    <p class="text-muted mb-0">Validate digital passes, scan QR tokens, and manage vehicle check-in / check-out.</p>
+                </div>
+
+                <div class="row justify-content-center">
+                    <div class="col-lg-8">
+                        <div class="sp-card mb-4">
+                            <h5 class="fw-bold mb-3"><i class="bi bi-upc-scan text-primary me-2"></i>Scan or Enter Pass Token</h5>
+                            <div class="input-group mb-3">
+                                <span class="input-group-text bg-white"><i class="bi bi-qr-code text-muted"></i></span>
+                                <input type="text" id="searchBookingInput" class="form-control form-control-lg" placeholder="Enter booking reference or paste QR token string..." autofocus>
+                                <button class="btn btn-primary px-4 fw-semibold" onclick="verifyBooking()">
+                                    <i class="bi bi-shield-check me-1"></i> Verify Pass
+                                </button>
+                            </div>
+                            <div class="d-flex gap-2 flex-wrap text-muted small">
+                                <span>Try sample references:</span>
+                                <button type="button" class="badge bg-light text-dark border" onclick="verifyBooking('SP-RES-2026-001')">SP-RES-2026-001 (Confirmed)</button>
+                                <button type="button" class="badge bg-light text-dark border" onclick="verifyBooking('SP-RES-2026-002')">SP-RES-2026-002 (Active)</button>
+                            </div>
+                        </div>
+
+                        <!-- Result Card -->
+                        <div id="verificationResultCard" class="sp-card d-none">
+                            <h5 class="fw-bold mb-3"><i class="bi bi-card-checklist text-success me-2"></i>Pass Verification Details</h5>
+                            <div id="verificationDetails"></div>
+                        </div>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <div th:replace="~{fragments/scripts :: scripts}"></div>
+    <script th:src="@{/js/customer.js}"></script>
+    <script th:src="@{/js/staff.js}"></script>
+</body>
+</html>

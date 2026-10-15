@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/head :: head('Parking Slots Management')}"></head>
+<body>
+    <div class="app-container">
+        <!-- Sidebar -->
+        <nav th:replace="~{fragments/sidebar :: sidebar('admin-slots')}"></nav>
+
+        <div class="main-wrapper">
+            <!-- Navbar -->
+            <header th:replace="~{fragments/navbar :: navbar}"></header>
+
+            <main class="content-body">
+                <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
+                    <div>
+                        <h2 class="fw-bold mb-1">Parking Slot Management</h2>
+                        <p class="text-muted mb-0">Configure slots, vehicle types, hourly pricing tiers, and maintenance availability.</p>
+                    </div>
+                    <div class="d-flex gap-2">
+                        <select class="form-select" id="slotAreaFilter" style="width: auto;">
+                            <option value="">All Areas</option>
+                        </select>
+                        <button class="btn btn-primary d-flex align-items-center gap-2" onclick="openEditSlotModal(null)">
+                            <i class="bi bi-plus-circle"></i> <span>Add Slot</span>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="sp-card">
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Slot Number</th>
+                                    <th>Parking Area</th>
+                                    <th>Compatible Type</th>
+                                    <th>Hourly Rate (₹)</th>
+                                    <th>Current Status</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="adminSlotsTableBody">
+                                <tr>
+                                    <td colspan="6" class="text-center py-4 text-muted">Loading slots...</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <!-- Slot Modal -->
+    <div class="modal fade" id="slotModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <form id="slotForm" onsubmit="saveSlot(event)">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="slotModalTitle">New Parking Slot</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body">
+                        <input type="hidden" id="slotId">
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold small">Parking Area</label>
+                            <select class="form-select" id="slotModalArea" required></select>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold small">Slot Identifier / Number</label>
+                            <input type="text" class="form-control" id="slotNumberInput" placeholder="e.g. A-101" required>
+                        </div>
+                        <div class="row g-2 mb-3">
+                            <div class="col-6">
+                                <label class="form-label fw-semibold small">Vehicle Compatibility</label>
+                                <select class="form-select" id="slotVehicleType" required>
+                                    <option value="CAR">CAR</option>
+                                    <option value="EV">EV (Charging)</option>
+                                    <option value="MOTORCYCLE">MOTORCYCLE</option>
+                                    <option value="TRUCK">TRUCK</option>
+                                </select>
+                            </div>
+                            <div class="col-6">
+                                <label class="form-label fw-semibold small">Hourly Rate (₹)</label>
+                                <input type="number" step="0.50" min="0" class="form-control" id="slotHourlyRate" required>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold small">Status</label>
+                            <select class="form-select" id="slotStatusSelect" required>
+                                <option value="AVAILABLE">AVAILABLE (Green)</option>
+                                <option value="OCCUPIED">OCCUPIED (Red)</option>
+                                <option value="RESERVED">RESERVED (Orange)</option>
+                                <option value="INACTIVE">INACTIVE (Gray)</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-primary">Save Slot</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div th:replace="~{fragments/scripts :: scripts}"></div>
+    <script th:src="@{/js/customer.js}"></script>
+    <script th:src="@{/js/admin.js}"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            initSlotsView();
+        });
+    </script>
+</body>
+</html>

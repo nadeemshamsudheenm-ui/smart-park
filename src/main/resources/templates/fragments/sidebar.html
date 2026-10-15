@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<body>
+<nav th:fragment="sidebar(activeTab)" class="sidebar" id="appSidebar">
+    <a th:href="@{/}" class="brand">
+        <i class="bi bi-p-square-fill"></i>
+        <span>SMART PARK</span>
+    </a>
+    
+    <div class="sidebar-nav">
+        <!-- Customer Section -->
+        <div sec:authorize="hasRole('CUSTOMER')">
+            <div class="sidebar-heading">Customer Portal</div>
+            <a th:href="@{/customer/dashboard}" class="nav-link" th:classappend="${activeTab == 'dashboard' ? 'active' : ''}">
+                <i class="bi bi-grid-1x2-fill"></i> <span>Dashboard</span>
+            </a>
+            <a th:href="@{/customer/book-slot}" class="nav-link" th:classappend="${activeTab == 'book-slot' ? 'active' : ''}">
+                <i class="bi bi-calendar2-plus-fill"></i> <span>Book Slot</span>
+            </a>
+            <a th:href="@{/customer/reservations}" class="nav-link" th:classappend="${activeTab == 'reservations' ? 'active' : ''}">
+                <i class="bi bi-ticket-perforated-fill"></i> <span>My Reservations</span>
+            </a>
+            <a th:href="@{/customer/vehicles}" class="nav-link" th:classappend="${activeTab == 'vehicles' ? 'active' : ''}">
+                <i class="bi bi-car-front-fill"></i> <span>My Vehicles</span>
+            </a>
+            <a th:href="@{/customer/payments}" class="nav-link" th:classappend="${activeTab == 'payments' ? 'active' : ''}">
+                <i class="bi bi-credit-card-2-front-fill"></i> <span>Payment History</span>
+            </a>
+        </div>
+
+        <!-- Staff Section -->
+        <div sec:authorize="hasRole('STAFF')">
+            <div class="sidebar-heading">Staff Operations</div>
+            <a th:href="@{/staff/dashboard}" class="nav-link" th:classappend="${activeTab == 'staff-dashboard' ? 'active' : ''}">
+                <i class="bi bi-speedometer2"></i> <span>Staff Dashboard</span>
+            </a>
+            <a th:href="@{/staff/verify}" class="nav-link" th:classappend="${activeTab == 'staff-verify' ? 'active' : ''}">
+                <i class="bi bi-qr-code-scan"></i> <span>Verify & Check-In</span>
+            </a>
+            <a th:href="@{/staff/live-sessions}" class="nav-link" th:classappend="${activeTab == 'staff-sessions' ? 'active' : ''}">
+                <i class="bi bi-clock-history"></i> <span>Active Sessions</span>
+            </a>
+        </div>
+
+        <!-- Admin Section -->
+        <div sec:authorize="hasRole('ADMIN')">
+            <div class="sidebar-heading">Administration</div>
+            <a th:href="@{/admin/dashboard}" class="nav-link" th:classappend="${activeTab == 'admin-dashboard' ? 'active' : ''}">
+                <i class="bi bi-graph-up-arrow"></i> <span>Dashboard</span>
+            </a>
+            <a th:href="@{/admin/areas}" class="nav-link" th:classappend="${activeTab == 'admin-areas' ? 'active' : ''}">
+                <i class="bi bi-geo-alt-fill"></i> <span>Parking Areas</span>
+            </a>
+            <a th:href="@{/admin/slots}" class="nav-link" th:classappend="${activeTab == 'admin-slots' ? 'active' : ''}">
+                <i class="bi bi-grid-3x3-gap-fill"></i> <span>Slot Management</span>
+            </a>
+            <a th:href="@{/admin/users}" class="nav-link" th:classappend="${activeTab == 'admin-users' ? 'active' : ''}">
+                <i class="bi bi-people-fill"></i> <span>Users & Staff</span>
+            </a>
+            <a th:href="@{/admin/reservations}" class="nav-link" th:classappend="${activeTab == 'admin-reservations' ? 'active' : ''}">
+                <i class="bi bi-journal-bookmark-fill"></i> <span>All Bookings</span>
+            </a>
+            <a th:href="@{/admin/payments}" class="nav-link" th:classappend="${activeTab == 'admin-payments' ? 'active' : ''}">
+                <i class="bi bi-cash-stack"></i> <span>Transactions</span>
+            </a>
+            <a th:href="@{/admin/reports}" class="nav-link" th:classappend="${activeTab == 'admin-reports' ? 'active' : ''}">
+                <i class="bi bi-pie-chart-fill"></i> <span>Reports & Charts</span>
+            </a>
+            <a th:href="@{/admin/audit-logs}" class="nav-link" th:classappend="${activeTab == 'admin-audit' ? 'active' : ''}">
+                <i class="bi bi-shield-check"></i> <span>Audit Logs</span>
+            </a>
+        </div>
+    </div>
+    
+    <div class="sidebar-footer">
+        <div class="small text-white-50">
+            <div>Smart Park v1.0</div>
+            <div>Three-Layer Spring + MySQL</div>
+        </div>
+    </div>
+</nav>
+</body>
+</html>

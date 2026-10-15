@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/head :: head('Parking Areas Management')}"></head>
+<body>
+    <div class="app-container">
+        <!-- Sidebar -->
+        <nav th:replace="~{fragments/sidebar :: sidebar('admin-areas')}"></nav>
+
+        <div class="main-wrapper">
+            <!-- Navbar -->
+            <header th:replace="~{fragments/navbar :: navbar}"></header>
+
+            <main class="content-body">
+                <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
+                    <div>
+                        <h2 class="fw-bold mb-1">Parking Area Management</h2>
+                        <p class="text-muted mb-0">Configure parking structures, geographic locations, and operating hours.</p>
+                    </div>
+                    <div>
+                        <button class="btn btn-primary d-flex align-items-center gap-2" onclick="openEditAreaModal(null)">
+                            <i class="bi bi-plus-circle"></i> <span>Add Parking Area</span>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="sp-card">
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Name & Address</th>
+                                    <th>Operating Hours</th>
+                                    <th>Capacity</th>
+                                    <th>Status</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="adminAreasTableBody">
+                                <tr>
+                                    <td colspan="6" class="text-center py-4 text-muted">Loading areas...</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <!-- Area Modal -->
+    <div class="modal fade" id="areaModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <form id="areaForm" onsubmit="saveArea(event)">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="areaModalTitle">New Parking Area</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body">
+                        <input type="hidden" id="areaId">
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold small">Area Name</label>
+                            <input type="text" class="form-control" id="areaName" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold small">Address</label>
+                            <input type="text" class="form-control" id="areaAddress" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold small">Description</label>
+                            <textarea class="form-control" id="areaDescription" rows="2"></textarea>
+                        </div>
+                        <div class="row g-2 mb-3">
+                            <div class="col-6">
+                                <label class="form-label fw-semibold small">Opening Time</label>
+                                <input type="time" class="form-control" id="areaOpeningTime" required>
+                            </div>
+                            <div class="col-6">
+                                <label class="form-label fw-semibold small">Closing Time</label>
+                                <input type="time" class="form-control" id="areaClosingTime" required>
+                            </div>
+                        </div>
+                        <div class="form-check form-switch">
+                            <input class="form-check-input" type="checkbox" id="areaActive" checked>
+                            <label class="form-check-label fw-semibold" for="areaActive">Facility Active</label>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-primary">Save Facility</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div th:replace="~{fragments/scripts :: scripts}"></div>
+    <script th:src="@{/js/admin.js}"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            initAreasView();
+        });
+    </script>
+</body>
+</html>

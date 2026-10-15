@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/head :: head('Home')}"></head>
+<body class="bg-light">
+
+    <!-- Top Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-dark" style="background-color: var(--sp-navy-sidebar);">
+        <div class="container">
+            <a class="navbar-brand d-flex align-items-center gap-2 fw-bold" th:href="@{/}">
+                <i class="bi bi-p-square-fill text-info fs-3"></i>
+                <span>SMART PARK</span>
+            </a>
+            <div class="d-flex align-items-center gap-2">
+                <a th:href="@{/login}" class="btn btn-outline-light btn-sm px-3">Sign In</a>
+                <a th:href="@{/register}" class="btn btn-primary btn-sm px-3">Register</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <header class="py-5 text-white" style="background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);">
+        <div class="container py-4 text-center">
+            <span class="badge bg-primary px-3 py-2 text-uppercase mb-3" style="letter-spacing: 1px;">Smart Mobility & IoT Platform</span>
+            <h1 class="display-4 fw-bold mb-3">SMART PARK — Digital Slot Management</h1>
+            <p class="lead text-white-50 mx-auto mb-4" style="max-width: 750px;">
+                An object-oriented digital parking platform featuring real-time slot availability, QR-based contactless verification, transactional double-booking prevention, and automated billing.
+            </p>
+            <div class="d-flex justify-content-center gap-3">
+                <a th:href="@{/register}" class="btn btn-primary btn-lg px-4 shadow">
+                    <i class="bi bi-person-plus-fill me-1"></i> Get Started as Customer
+                </a>
+                <a th:href="@{/login}" class="btn btn-outline-light btn-lg px-4">
+                    <i class="bi bi-box-arrow-in-right me-1"></i> Log In
+                </a>
+            </div>
+        </div>
+    </header>
+
+    <!-- System Highlights -->
+    <section class="container py-5">
+        <div class="row g-4 text-center">
+            <div class="col-md-4">
+                <div class="sp-card h-100 p-4">
+                    <div class="stat-icon stat-green mx-auto mb-3">
+                        <i class="bi bi-grid-3x3-gap-fill"></i>
+                    </div>
+                    <h5 class="fw-bold">Real-Time Slot Engine</h5>
+                    <p class="text-muted small">
+                        Interactive visual layouts showing green (AVAILABLE), red (OCCUPIED), orange (RESERVED), and gray (INACTIVE) statuses with strict interval overlap prevention.
+                    </p>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="sp-card h-100 p-4">
+                    <div class="stat-icon stat-blue mx-auto mb-3">
+                        <i class="bi bi-qr-code-scan"></i>
+                    </div>
+                    <h5 class="fw-bold">ZXing QR Verification</h5>
+                    <p class="text-muted small">
+                        Opaque, cryptographic reservation tokens generated with ZXing, enabling instant camera or manual gate scan check-in and checkout.
+                    </p>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="sp-card h-100 p-4">
+                    <div class="stat-icon stat-orange mx-auto mb-3">
+                        <i class="bi bi-calculator-fill"></i>
+                    </div>
+                    <h5 class="fw-bold">Automated Billing Service</h5>
+                    <p class="text-muted small">
+                        Accurate timestamp duration tracking, configurable minimum billing hours, and simulated instant electronic payment processing.
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Role Access Quick Guide -->
+        <div class="sp-card mt-5 p-4">
+            <h5 class="fw-bold mb-3"><i class="bi bi-key-fill text-primary me-2"></i>Default Development Demo Credentials</h5>
+            <div class="row g-3">
+                <div class="col-md-4">
+                    <div class="p-3 border rounded-3 bg-light">
+                        <div class="badge bg-danger mb-2">ADMIN ROLE</div>
+                        <div class="fw-bold">admin@smartpark.com</div>
+                        <div class="small text-muted">Password: <code>Admin@123</code></div>
+                        <div class="small text-secondary mt-1">Full system control, pricing, staff assignment & analytics.</div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="p-3 border rounded-3 bg-light">
+                        <div class="badge bg-warning text-dark mb-2">STAFF ROLE</div>
+                        <div class="fw-bold">staff@smartpark.com</div>
+                        <div class="small text-muted">Password: <code>Staff@123</code></div>
+                        <div class="small text-secondary mt-1">QR check-in/out gate scanning & parking session monitoring.</div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="p-3 border rounded-3 bg-light">
+                        <div class="badge bg-primary mb-2">CUSTOMER ROLE</div>
+                        <div class="fw-bold">customer@smartpark.com</div>
+                        <div class="small text-muted">Password: <code>Customer@123</code></div>
+                        <div class="small text-secondary mt-1">Vehicle registration, slot booking, QR passes & receipts.</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="bg-white border-top py-4 text-center text-muted small">
+        <div class="container">
+            SMART PARK — An Object-Oriented Digital Parking Platform &copy; 2026. Built with Spring Boot 3, MySQL & Bootstrap 5.
+        </div>
+    </footer>
+
+    <div th:replace="~{fragments/scripts :: scripts}"></div>
+</body>
+</html>

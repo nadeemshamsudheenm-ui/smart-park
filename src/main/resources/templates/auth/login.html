@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/head :: head('Sign In')}"></head>
+<body class="d-flex align-items-center justify-content-center min-vh-100 bg-light">
+
+    <div class="container" style="max-width: 480px;">
+        <div class="text-center mb-4">
+            <a th:href="@{/}" class="text-decoration-none text-dark d-inline-flex align-items-center gap-2 mb-2">
+                <i class="bi bi-p-square-fill text-primary display-5"></i>
+                <span class="fs-2 fw-bold">SMART PARK</span>
+            </a>
+            <p class="text-muted">Sign in to access your digital parking dashboard</p>
+        </div>
+
+        <div class="sp-card shadow-sm p-4 p-sm-5">
+            <!-- Error message banner -->
+            <div th:if="${param.error}" class="alert alert-danger py-2 small d-flex align-items-center gap-2" role="alert">
+                <i class="bi bi-exclamation-triangle-fill"></i>
+                <span>Invalid email or password. Please try again.</span>
+            </div>
+
+            <!-- Logout message banner -->
+            <div th:if="${param.logout}" class="alert alert-success py-2 small d-flex align-items-center gap-2" role="alert">
+                <i class="bi bi-check-circle-fill"></i>
+                <span>You have been signed out successfully.</span>
+            </div>
+
+            <form th:action="@{/login}" method="post">
+                <div class="mb-3">
+                    <label for="email" class="form-label fw-semibold">Email Address</label>
+                    <div class="input-group">
+                        <span class="input-group-text bg-white"><i class="bi bi-envelope text-muted"></i></span>
+                        <input type="email" class="form-control" id="email" name="email" placeholder="name@example.com" required autofocus>
+                    </div>
+                </div>
+
+                <div class="mb-4">
+                    <label for="password" class="form-label fw-semibold">Password</label>
+                    <div class="input-group">
+                        <span class="input-group-text bg-white"><i class="bi bi-lock text-muted"></i></span>
+                        <input type="password" class="form-control" id="password" name="password" placeholder="••••••••" required>
+                    </div>
+                </div>
+
+                <button type="submit" class="btn btn-primary w-100 py-2 fw-semibold">
+                    <i class="bi bi-box-arrow-in-right me-1"></i> Sign In
+                </button>
+            </form>
+
+            <div class="text-center mt-4 pt-3 border-top">
+                <p class="text-muted small mb-0">Don't have an account? <a th:href="@{/register}" class="fw-semibold text-primary">Register here</a></p>
+            </div>
+        </div>
+
+        <!-- Demo Quickfill Helper -->
+        <div class="mt-4 p-3 bg-white border rounded-3 text-center small">
+            <span class="fw-bold text-secondary d-block mb-2"><i class="bi bi-lightning-charge-fill text-warning"></i> Quick Demo Autofill</span>
+            <div class="d-flex justify-content-center gap-2 flex-wrap">
+                <button type="button" class="btn btn-sm btn-outline-danger" onclick="fillCreds('admin@smartpark.com', 'Admin@123')">Admin</button>
+                <button type="button" class="btn btn-sm btn-outline-warning text-dark" onclick="fillCreds('staff@smartpark.com', 'Staff@123')">Staff</button>
+                <button type="button" class="btn btn-sm btn-outline-primary" onclick="fillCreds('customer@smartpark.com', 'Customer@123')">Customer</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function fillCreds(email, pass) {
+            document.getElementById('email').value = email;
+            document.getElementById('password').value = pass;
+        }
+    </script>
+    <div th:replace="~{fragments/scripts :: scripts}"></div>
+</body>
+</html>

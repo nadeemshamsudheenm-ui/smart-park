@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/head :: head('Audit Logs')}"></head>
+<body>
+    <div class="app-container">
+        <!-- Sidebar -->
+        <nav th:replace="~{fragments/sidebar :: sidebar('admin-audit')}"></nav>
+
+        <div class="main-wrapper">
+            <!-- Navbar -->
+            <header th:replace="~{fragments/navbar :: navbar}"></header>
+
+            <main class="content-body">
+                <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
+                    <div>
+                        <h2 class="fw-bold mb-1">Administrative Audit Trail</h2>
+                        <p class="text-muted mb-0">Immutable records of system logins, reservations, gate operations, and administrative alterations.</p>
+                    </div>
+                    <div>
+                        <button class="btn btn-outline-primary" onclick="initAuditLogsView()">
+                            <i class="bi bi-arrow-clockwise me-1"></i> Refresh Logs
+                        </button>
+                    </div>
+                </div>
+
+                <div class="sp-card">
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Actor / User</th>
+                                    <th>Action Type</th>
+                                    <th>Details</th>
+                                    <th>Timestamp</th>
+                                </tr>
+                            </thead>
+                            <tbody id="auditLogsTableBody">
+                                <tr>
+                                    <td colspan="5" class="text-center py-4 text-muted">Loading audit trail...</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <div th:replace="~{fragments/scripts :: scripts}"></div>
+    <script th:src="@{/js/admin.js}"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            initAuditLogsView();
+        });
+    </script>
+</body>
+</html>

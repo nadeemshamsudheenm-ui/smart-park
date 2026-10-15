@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/head :: head('Staff Dashboard')}"></head>
+<body>
+    <div class="app-container">
+        <!-- Sidebar -->
+        <nav th:replace="~{fragments/sidebar :: sidebar('staff-dashboard')}"></nav>
+
+        <div class="main-wrapper">
+            <!-- Navbar -->
+            <header th:replace="~{fragments/navbar :: navbar}"></header>
+
+            <main class="content-body">
+                <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
+                    <div>
+                        <h2 class="fw-bold mb-1">Staff Operations Hub</h2>
+                        <p class="text-muted mb-0">Monitor gate check-ins, verify reservations, and calculate exit billing in real-time.</p>
+                    </div>
+                    <div>
+                        <a th:href="@{/staff/verify}" class="btn btn-primary d-flex align-items-center gap-2 shadow-sm">
+                            <i class="bi bi-qr-code-scan"></i> <span>Scan / Verify Pass</span>
+                        </a>
+                    </div>
+                </div>
+
+                <!-- KPI Metric Cards -->
+                <div class="row g-3 mb-4">
+                    <div class="col-sm-6 col-xl-3">
+                        <div class="sp-card stat-card">
+                            <div>
+                                <div class="text-muted small fw-semibold">TODAY'S BOOKINGS</div>
+                                <div class="fs-2 fw-bold text-dark mt-1" id="staffMetricToday">—</div>
+                            </div>
+                            <div class="stat-icon stat-blue">
+                                <i class="bi bi-calendar2-check"></i>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-sm-6 col-xl-3">
+                        <div class="sp-card stat-card">
+                            <div>
+                                <div class="text-muted small fw-semibold">EXPECTED ARRIVALS</div>
+                                <div class="fs-2 fw-bold text-primary mt-1" id="staffMetricArrivals">—</div>
+                            </div>
+                            <div class="stat-icon stat-orange">
+                                <i class="bi bi-box-arrow-in-right"></i>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-sm-6 col-xl-3">
+                        <div class="sp-card stat-card">
+                            <div>
+                                <div class="text-muted small fw-semibold">CURRENTLY PARKED</div>
+                                <div class="fs-2 fw-bold text-success mt-1" id="staffMetricParked">—</div>
+                            </div>
+                            <div class="stat-icon stat-green">
+                                <i class="bi bi-car-front-fill"></i>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-sm-6 col-xl-3">
+                        <div class="sp-card stat-card">
+                            <div>
+                                <div class="text-muted small fw-semibold">COMPLETED TODAY</div>
+                                <div class="fs-2 fw-bold text-secondary mt-1" id="staffMetricCompleted">—</div>
+                            </div>
+                            <div class="stat-icon stat-purple">
+                                <i class="bi bi-check-circle-fill"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Quick Verification Input Box -->
+                <div class="sp-card mb-4">
+                    <h5 class="fw-bold mb-3"><i class="bi bi-search text-primary me-2"></i>Quick Gate Verification</h5>
+                    <div class="row g-2">
+                        <div class="col-md-9">
+                            <div class="input-group">
+                                <span class="input-group-text bg-white"><i class="bi bi-qr-code text-muted"></i></span>
+                                <input type="text" id="searchBookingInput" class="form-control form-control-lg" placeholder="Scan QR code or enter booking reference (e.g. SP-2026-001)...">
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <button type="button" class="btn btn-primary btn-lg w-100" onclick="verifyBooking()">
+                                <i class="bi bi-search me-1"></i> Verify Pass
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Dynamic Verification Card -->
+                    <div id="verificationResultCard" class="mt-4 p-4 border rounded-3 bg-light d-none">
+                        <div id="verificationDetails"></div>
+                    </div>
+                </div>
+
+                <!-- Currently Parked Vehicles Table -->
+                <div class="sp-card">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h5 class="fw-bold mb-0"><i class="bi bi-p-circle-fill text-success me-2"></i>Currently Parked Vehicles (Assigned Areas)</h5>
+                        <button class="btn btn-sm btn-outline-secondary" onclick="loadActiveSessions()">
+                            <i class="bi bi-arrow-clockwise"></i> Refresh
+                        </button>
+                    </div>
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Booking Ref</th>
+                                    <th>Vehicle</th>
+                                    <th>Area & Slot</th>
+                                    <th>Driver</th>
+                                    <th>Entry Timestamp</th>
+                                    <th>Status</th>
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
+                            <tbody id="activeSessionsTableBody">
+                                <tr>
+                                    <td colspan="7" class="text-center py-4 text-muted">Loading active sessions...</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <div th:replace="~{fragments/scripts :: scripts}"></div>
+    <script th:src="@{/js/customer.js}"></script>
+    <script th:src="@{/js/staff.js}"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            initStaffDashboard();
+        });
+    </script>
+</body>
+</html>

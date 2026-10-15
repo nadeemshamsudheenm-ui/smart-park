@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/head :: head('Financial Transactions')}"></head>
+<body>
+    <div class="app-container">
+        <!-- Sidebar -->
+        <nav th:replace="~{fragments/sidebar :: sidebar('admin-payments')}"></nav>
+
+        <div class="main-wrapper">
+            <!-- Navbar -->
+            <header th:replace="~{fragments/navbar :: navbar}"></header>
+
+            <main class="content-body">
+                <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
+                    <div>
+                        <h2 class="fw-bold mb-1">Financial Transactions & Revenue</h2>
+                        <p class="text-muted mb-0">Audited transaction records, settlement states, and electronic payment references.</p>
+                    </div>
+                </div>
+
+                <div class="sp-card">
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Transaction Ref</th>
+                                    <th>Booking Ref</th>
+                                    <th>Amount</th>
+                                    <th>Payment Method</th>
+                                    <th>Status</th>
+                                    <th>Timestamp</th>
+                                </tr>
+                            </thead>
+                            <tbody id="adminPaymentsTableBody">
+                                <tr>
+                                    <td colspan="6" class="text-center py-4 text-muted">Loading payments...</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <div th:replace="~{fragments/scripts :: scripts}"></div>
+    <script th:src="@{/js/admin.js}"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', async () => {
+            try {
+                const res = await apiFetch('/api/payments');
+                const list = res.data || [];
+                const table = document.getElementById('adminPaymentsTableBody');
+
+                table.innerHTML = list.map(p => `
+                    <tr>
+                        <td><strong>${p.transactionReference}</strong></td>
+                        <td>${p.reservation ? p.reservation.bookingReference : '—'}</td>
+                        <td class="fw-bold text-success">${formatCurrency(p.amount)}</td>
+                        <td>${p.paymentMethod}</td>
+                        <td><span class="badge ${p.paymentStatus === 'COMPLETED' ? 'bg-success' : 'bg-warning text-dark'}">${p.paymentStatus}</span></td>
+                        <td><small class="text-muted">${formatDateTime(p.paidAt || p.createdAt)}</small></td>
+                    </tr>
+                `).join('');
+            } catch (e) {
+                showToast('Error loading payments: ' + e.message, 'danger');
+            }
+        });
+    </script>
+</body>
+</html>

@@ -127,7 +127,7 @@ Database connectivity is configured in `src/main/resources/application.propertie
 
 ### Example `application.properties`:
 ```properties
-spring.datasource.url=${DB_URL:jdbc:mysql://localhost:3306/smartpark_db?createDatabaseIfNotExist=true&useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC}
+spring.datasource.url=${DB_URL:jdbc:mysql://localhost:3306/smartpark_db?createDatabaseIfNotExist=true&useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=Asia/Kolkata}
 spring.datasource.username=${DB_USERNAME:root}
 spring.datasource.password=${DB_PASSWORD:}
 spring.datasource.driver-class-name=com.mysql.cj.jdbc.Driver

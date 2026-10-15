@@ -167,6 +167,18 @@
         </div>
       </div>
 
+      <!-- Live Indian Standard Time (IST) Clock -->
+      <div class="d-flex align-items-center gap-2 bg-dark bg-opacity-50 px-3 py-1.5 rounded-3 border border-secondary border-opacity-25 text-nowrap">
+        <i class="bi bi-clock-history text-warning fs-5"></i>
+        <div class="text-start">
+          <div class="d-flex align-items-center gap-1">
+            <span class="badge bg-warning text-dark fw-bold px-1 py-0" style="font-size: 0.65rem; letter-spacing: 0.5px;">IST</span>
+            <span class="fw-bold font-monospace text-warning lh-1" id="istClockTime" style="font-size: 0.95rem;">--:--:-- --</span>
+          </div>
+          <small class="text-white-50 d-block" id="istClockDate" style="font-size: 0.7rem;">Indian Standard Time (UTC+05:30)</small>
+        </div>
+      </div>
+
       <!-- Live Role Switcher -->
       <div class="d-flex align-items-center gap-1 bg-dark bg-opacity-50 p-1 rounded-3 border border-secondary border-opacity-25">
         <span class="text-white-50 small px-2 d-none d-sm-inline fw-semibold">Role:</span>
@@ -255,7 +267,7 @@
               </div>
               <div class="d-flex justify-content-between align-items-center">
                 <span class="fw-bold">Estimated Cost:</span>
-                <span class="fs-4 fw-bold text-success" id="displayEstPrice">$0.00</span>
+                <span class="fs-4 fw-bold text-success" id="displayEstPrice">₹0.00</span>
               </div>
               <div class="small text-muted mt-1" style="font-size: 0.75rem;">
                 * Conflict-free interval engine prevents double-booking.
@@ -387,7 +399,7 @@
         <div class="col-sm-6 col-xl-3"><div class="sp-card p-3 d-flex justify-content-between align-items-center"><div><div class="text-muted small">RESERVED</div><div class="fs-3 fw-bold text-warning" id="adStatRes">1</div></div><div class="stat-icon stat-orange"><i class="bi bi-clock"></i></div></div></div>
         <div class="col-sm-6 col-xl-3"><div class="sp-card p-3 d-flex justify-content-between align-items-center"><div><div class="text-muted small">ACTIVE SESSIONS</div><div class="fs-3 fw-bold text-primary" id="adStatAct">2</div></div><div class="stat-icon stat-blue"><i class="bi bi-car-front"></i></div></div></div>
         <div class="col-sm-6 col-xl-3"><div class="sp-card p-3 d-flex justify-content-between align-items-center"><div><div class="text-muted small">COMPLETED</div><div class="fs-3 fw-bold text-secondary" id="adStatComp">14</div></div><div class="stat-icon stat-purple"><i class="bi bi-journal-check"></i></div></div></div>
-        <div class="col-sm-6 col-xl-3"><div class="sp-card p-3 d-flex justify-content-between align-items-center"><div><div class="text-muted small">AUDITED REVENUE</div><div class="fs-3 fw-bold text-success" id="adStatRev">$285.50</div></div><div class="stat-icon stat-green"><i class="bi bi-cash-coin"></i></div></div></div>
+        <div class="col-sm-6 col-xl-3"><div class="sp-card p-3 d-flex justify-content-between align-items-center"><div><div class="text-muted small">AUDITED REVENUE</div><div class="fs-3 fw-bold text-success" id="adStatRev">₹285.50</div></div><div class="stat-icon stat-green"><i class="bi bi-cash-coin"></i></div></div></div>
       </div>
 
       <!-- Charts -->
@@ -496,18 +508,45 @@
           id: 2, reference: "SP-2026-002", plate: "EV-345-TES", type: "EV",
           slotId: 5, slotNum: "A-105", areaId: 1, areaName: "Metro Central Plaza",
           startH: 8, endH: 12, status: "ACTIVE", fee: 22.50, paid: false,
-          token: "uuid-7a11-b992-1e55", driver: "Alex Johnson", entryTime: "08:15 AM"
+          token: "uuid-7a11-b992-1e55", driver: "Alex Johnson", entryTime: "08:15 AM IST"
         }
       ]
     };
 
     document.addEventListener('DOMContentLoaded', () => {
+      initIstClock();
       populateCustomerOptions();
       renderSlots();
       renderReservationsTable();
       updateStaffPortal();
       initAdminCharts();
     });
+
+    function initIstClock() {
+      function updateClock() {
+        const now = new Date();
+        const timeStr = now.toLocaleTimeString('en-IN', {
+          timeZone: 'Asia/Kolkata',
+          hour: '2-digit',
+          minute: '2-digit',
+          second: '2-digit',
+          hour12: true
+        });
+        const dateStr = now.toLocaleDateString('en-IN', {
+          timeZone: 'Asia/Kolkata',
+          weekday: 'short',
+          day: '2-digit',
+          month: 'short',
+          year: 'numeric'
+        });
+        const timeEl = document.getElementById('istClockTime');
+        const dateEl = document.getElementById('istClockDate');
+        if (timeEl) timeEl.textContent = timeStr;
+        if (dateEl) dateEl.textContent = `${dateStr} (IST)`;
+      }
+      updateClock();
+      setInterval(updateClock, 1000);
+    }
 
     function switchRole(role) {
       APP.activeRole = role;
@@ -557,7 +596,7 @@
 
       APP.selectedSlotId = null;
       document.getElementById('displaySelectedSlot').textContent = 'None Selected';
-      document.getElementById('displayEstPrice').textContent = '$0.00';
+      document.getElementById('displayEstPrice').textContent = '₹0.00';
       document.getElementById('btnBookSlot').disabled = true;
 
       const grid = document.getElementById('slotsGrid');
@@ -580,7 +619,7 @@
           <div class="slot-item ${sClass}" ${click ? `onclick="selectBay(${s.id}, '${s.number}', ${s.rate}, this)"` : ''}>
             <div class="fw-bold fs-5">${s.number}</div>
             <div class="small fw-semibold text-muted">${s.type}</div>
-            <div class="small fw-bold">$${s.rate.toFixed(2)}/hr</div>
+            <div class="small fw-bold">₹${s.rate.toFixed(2)}/hr</div>
             <span class="slot-badge">${sBadge}</span>
           </div>
         `;
@@ -597,8 +636,8 @@
       const hrs = Math.max(1, eH - sH);
       const fee = (hrs * rate).toFixed(2);
 
-      document.getElementById('displaySelectedSlot').textContent = `${num} ($${rate}/hr)`;
-      document.getElementById('displayEstPrice').textContent = `$${fee} (${hrs}h)`;
+      document.getElementById('displaySelectedSlot').textContent = `${num} (₹${rate}/hr)`;
+      document.getElementById('displayEstPrice').textContent = `₹${fee} (${hrs}h)`;
       document.getElementById('btnBookSlot').disabled = false;
     }
 
@@ -653,7 +692,7 @@
           <td>${r.plate} (${r.type})</td>
           <td>${r.startH}:00 - ${r.endH}:00</td>
           <td><span class="badge ${getStatusBadge(r.status)}">${r.status}</span></td>
-          <td><span class="fw-bold text-success">$${r.fee.toFixed(2)}</span> <span class="badge ${r.paid ? 'bg-success' : 'bg-warning text-dark'}">${r.paid ? 'PAID' : 'PENDING'}</span></td>
+          <td><span class="fw-bold text-success">₹${r.fee.toFixed(2)}</span> <span class="badge ${r.paid ? 'bg-success' : 'bg-warning text-dark'}">${r.paid ? 'PAID' : 'PENDING'}</span></td>
           <td>
             <button class="btn btn-sm btn-outline-primary" onclick="openModalById(${r.id})"><i class="bi bi-qr-code"></i></button>
             ${r.status === 'CONFIRMED' ? `<button class="btn btn-sm btn-outline-danger" onclick="cancelRes(${r.id})"><i class="bi bi-x-circle"></i></button>` : ''}
@@ -678,7 +717,7 @@
       const r = APP.reservations.find(x => x.id === id);
       if (!r) return;
       r.paid = true;
-      showToast(`Payment of $${r.fee.toFixed(2)} completed`, 'success');
+      showToast(`Payment of ₹${r.fee.toFixed(2)} completed`, 'success');
       renderReservationsTable();
       updateAdminKPIs();
     }
@@ -694,7 +733,7 @@
       document.getElementById('mToken').textContent = `Pass Token: ${r.token}`;
       document.getElementById('mVeh').textContent = `${r.plate} (${r.type})`;
       document.getElementById('mTime').textContent = `${r.startH}:00 to ${r.endH}:00`;
-      document.getElementById('mFee').textContent = `$${r.fee.toFixed(2)}`;
+      document.getElementById('mFee').textContent = `₹${r.fee.toFixed(2)}`;
 
       drawQr('mSvg', r.reference);
       new bootstrap.Modal(document.getElementById('qrPassModal')).show();
@@ -789,7 +828,7 @@
       const r = APP.reservations.find(x => x.id === id);
       if (!r) return;
       r.status = 'ACTIVE';
-      r.entryTime = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+      r.entryTime = new Date().toLocaleTimeString('en-IN', { timeZone: 'Asia/Kolkata', hour: '2-digit', minute: '2-digit', hour12: true }) + ' IST';
       const slot = APP.slots.find(s => s.id === r.slotId);
       if (slot) slot.status = 'OCCUPIED';
 
@@ -829,7 +868,7 @@
       document.getElementById('adStatRes').textContent = resCount;
       document.getElementById('adStatAct').textContent = act;
       document.getElementById('adStatComp').textContent = comp;
-      document.getElementById('adStatRev').textContent = `$${rev.toFixed(2)}`;
+      document.getElementById('adStatRev').textContent = `₹${rev.toFixed(2)}`;
     }
 
     function initAdminCharts() {
@@ -854,7 +893,7 @@
           type: 'line',
           data: {
             labels: ['Day 1', 'Day 2', 'Day 3', 'Day 4', 'Day 5', 'Day 6', 'Today'],
-            datasets: [{ label: 'Revenue ($)', data: [45, 60, 50, 80, 95, 110, 140], borderColor: '#2563eb', tension: 0.3 }]
+            datasets: [{ label: 'Revenue (₹)', data: [45, 60, 50, 80, 95, 110, 140], borderColor: '#2563eb', tension: 0.3 }]
           },
           options: { responsive: true, maintainAspectRatio: false }
         });

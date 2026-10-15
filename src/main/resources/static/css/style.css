@@ -1,0 +1,364 @@
+:root {
+    --sp-navy-dark: #0f172a;
+    --sp-navy-sidebar: #1e293b;
+    --sp-navy-hover: #334155;
+    --sp-blue-primary: #2563eb;
+    --sp-blue-hover: #1d4ed8;
+    --sp-blue-light: #eff6ff;
+    --sp-bg: #f8fafc;
+    --sp-card-bg: #ffffff;
+    --sp-border: #e2e8f0;
+    --sp-text-main: #1e293b;
+    --sp-text-muted: #64748b;
+    
+    /* Slot status colors */
+    --status-available: #10b981;
+    --status-occupied: #ef4444;
+    --status-reserved: #f59e0b;
+    --status-inactive: #94a3b8;
+}
+
+body {
+    background-color: var(--sp-bg);
+    color: var(--sp-text-main);
+    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    min-height: 100vh;
+}
+
+/* Layout */
+.app-container {
+    display: flex;
+    min-height: 100vh;
+}
+
+/* Sidebar */
+.sidebar {
+    width: 260px;
+    background-color: var(--sp-navy-sidebar);
+    color: #ffffff;
+    flex-shrink: 0;
+    display: flex;
+    flex-direction: column;
+    transition: all 0.3s ease;
+    z-index: 1000;
+}
+
+.sidebar .brand {
+    padding: 1.5rem 1.25rem;
+    font-size: 1.25rem;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    color: #ffffff;
+    text-decoration: none;
+}
+
+.sidebar .brand i {
+    color: #38bdf8;
+    font-size: 1.5rem;
+}
+
+.sidebar-nav {
+    padding: 1rem 0.75rem;
+    flex-grow: 1;
+}
+
+.sidebar-heading {
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: #94a3b8;
+    padding: 0.75rem 0.5rem 0.25rem;
+    font-weight: 600;
+}
+
+.sidebar-nav .nav-link {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    color: #cbd5e1;
+    padding: 0.7rem 0.85rem;
+    border-radius: 0.5rem;
+    margin-bottom: 0.25rem;
+    font-size: 0.95rem;
+    font-weight: 500;
+    text-decoration: none;
+    transition: all 0.2s ease;
+}
+
+.sidebar-nav .nav-link:hover {
+    color: #ffffff;
+    background-color: var(--sp-navy-hover);
+}
+
+.sidebar-nav .nav-link.active {
+    color: #ffffff;
+    background-color: var(--sp-blue-primary);
+}
+
+.sidebar-nav .nav-link i {
+    font-size: 1.15rem;
+    width: 24px;
+    text-align: center;
+}
+
+.sidebar-footer {
+    padding: 1rem;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* Content Area */
+.main-wrapper {
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+}
+
+.top-navbar {
+    background-color: #ffffff;
+    border-bottom: 1px solid var(--sp-border);
+    padding: 0.75rem 1.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.content-body {
+    padding: 1.75rem 2rem;
+    flex-grow: 1;
+}
+
+/* Dashboard Cards */
+.sp-card {
+    background: var(--sp-card-bg);
+    border: 1px solid var(--sp-border);
+    border-radius: 0.75rem;
+    padding: 1.5rem;
+    box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.05);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.sp-card:hover {
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.07);
+}
+
+.stat-card {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.stat-icon {
+    width: 52px;
+    height: 52px;
+    border-radius: 0.75rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+}
+
+.stat-blue { background-color: #dbeafe; color: #2563eb; }
+.stat-green { background-color: #d1fae5; color: #10b981; }
+.stat-orange { background-color: #fef3c7; color: #f59e0b; }
+.stat-red { background-color: #fee2e2; color: #ef4444; }
+.stat-purple { background-color: #ede9fe; color: #8b5cf6; }
+
+/* Buttons */
+.btn-primary {
+    background-color: var(--sp-blue-primary);
+    border-color: var(--sp-blue-primary);
+}
+
+.btn-primary:hover, .btn-primary:focus {
+    background-color: var(--sp-blue-hover);
+    border-color: var(--sp-blue-hover);
+}
+
+/* Interactive Parking Slot Grid */
+.slot-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+    gap: 1rem;
+    margin-top: 1rem;
+}
+
+.slot-item {
+    border-radius: 0.65rem;
+    padding: 1rem 0.75rem;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    border: 2px solid transparent;
+    position: relative;
+    user-select: none;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+}
+
+.slot-item:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
+}
+
+/* Slot Status Styles */
+.slot-available {
+    background-color: #ecfdf5;
+    border-color: var(--status-available);
+    color: #065f46;
+}
+
+.slot-available .slot-badge {
+    background-color: var(--status-available);
+    color: #ffffff;
+}
+
+.slot-occupied {
+    background-color: #fef2f2;
+    border-color: var(--status-occupied);
+    color: #991b1b;
+    cursor: not-allowed;
+    opacity: 0.9;
+}
+
+.slot-occupied .slot-badge {
+    background-color: var(--status-occupied);
+    color: #ffffff;
+}
+
+.slot-reserved {
+    background-color: #fffbeb;
+    border-color: var(--status-reserved);
+    color: #92400e;
+    cursor: not-allowed;
+}
+
+.slot-reserved .slot-badge {
+    background-color: var(--status-reserved);
+    color: #ffffff;
+}
+
+.slot-inactive {
+    background-color: #f1f5f9;
+    border-color: var(--status-inactive);
+    color: #475569;
+    cursor: not-allowed;
+    opacity: 0.6;
+}
+
+.slot-inactive .slot-badge {
+    background-color: var(--status-inactive);
+    color: #ffffff;
+}
+
+.slot-item.selected {
+    box-shadow: 0 0 0 3px #2563eb, 0 6px 12px rgba(37, 99, 235, 0.2);
+    border-color: #2563eb;
+    background-color: #eff6ff;
+}
+
+.slot-number {
+    font-size: 1.25rem;
+    font-weight: 700;
+    margin-bottom: 0.25rem;
+}
+
+.slot-type {
+    font-size: 0.8rem;
+    font-weight: 600;
+    margin-bottom: 0.25rem;
+}
+
+.slot-price {
+    font-size: 0.85rem;
+    font-weight: 500;
+}
+
+.slot-badge {
+    display: inline-block;
+    padding: 0.15rem 0.5rem;
+    border-radius: 9999px;
+    font-size: 0.7rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    margin-top: 0.5rem;
+}
+
+/* Legend */
+.slot-legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1.25rem;
+    align-items: center;
+    background-color: #ffffff;
+    padding: 0.75rem 1.25rem;
+    border-radius: 0.5rem;
+    border: 1px solid var(--sp-border);
+}
+
+.legend-item {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.875rem;
+    font-weight: 500;
+}
+
+.legend-color {
+    width: 14px;
+    height: 14px;
+    border-radius: 3px;
+}
+
+.color-available { background-color: var(--status-available); }
+.color-occupied { background-color: var(--status-occupied); }
+.color-reserved { background-color: var(--status-reserved); }
+.color-inactive { background-color: var(--status-inactive); }
+
+/* QR Code Container */
+.qr-container {
+    background: #ffffff;
+    padding: 1.25rem;
+    border-radius: 0.75rem;
+    border: 1px solid var(--sp-border);
+    display: inline-block;
+    text-align: center;
+}
+
+.qr-container img {
+    max-width: 220px;
+    height: auto;
+    border-radius: 0.5rem;
+}
+
+/* Receipt Print View */
+@media print {
+    body * {
+        visibility: hidden;
+    }
+    #receipt-section, #receipt-section * {
+        visibility: visible;
+    }
+    #receipt-section {
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 100%;
+        margin: 0;
+        padding: 2rem;
+    }
+    .no-print {
+        display: none !important;
+    }
+}
+
+/* Toast Container */
+.toast-container {
+    position: fixed;
+    top: 1.5rem;
+    right: 1.5rem;
+    z-index: 9999;
+}

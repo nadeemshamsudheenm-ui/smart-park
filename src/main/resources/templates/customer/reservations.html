@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/head :: head('My Reservations')}"></head>
+<body>
+    <div class="app-container">
+        <!-- Sidebar -->
+        <nav th:replace="~{fragments/sidebar :: sidebar('reservations')}"></nav>
+
+        <div class="main-wrapper">
+            <!-- Navbar -->
+            <header th:replace="~{fragments/navbar :: navbar}"></header>
+
+            <main class="content-body">
+                <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
+                    <div>
+                        <h2 class="fw-bold mb-1">My Parking Reservations</h2>
+                        <p class="text-muted mb-0">Track all your active, confirmed, and historical parking passes.</p>
+                    </div>
+                    <div>
+                        <a th:href="@{/customer/book-slot}" class="btn btn-primary d-flex align-items-center gap-2">
+                            <i class="bi bi-plus-circle"></i> <span>New Reservation</span>
+                        </a>
+                    </div>
+                </div>
+
+                <div class="sp-card">
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Reference</th>
+                                    <th>Parking Area & Slot</th>
+                                    <th>Vehicle</th>
+                                    <th>Start Time</th>
+                                    <th>End Time</th>
+                                    <th>Status</th>
+                                    <th>Payment</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="allReservationsTableBody">
+                                <tr>
+                                    <td colspan="8" class="text-center py-4 text-muted">Loading reservations...</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <div th:replace="~{fragments/scripts :: scripts}"></div>
+    <script th:src="@{/js/customer.js}"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            initReservationsView();
+        });
+    </script>
+</body>
+</html>
